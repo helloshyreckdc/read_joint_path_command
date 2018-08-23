@@ -6,7 +6,11 @@
 #include <vector>
 #include <cstdio>
 #include "cubicSpline.h"
-#
+
+using namespace std;
+
+vector<vector<double>> all_points;
+
 #define AXIS_COUNT 6
 void chatterCB(const trajectory_msgs::JointTrajectory& msg)
 {
@@ -39,12 +43,25 @@ void chatterCB(const trajectory_msgs::JointTrajectory& msg)
         double x_out = 0;
         double y_out = 0;
         ROS_INFO("%f",(double)msg.points[points_count-1].time_from_start.toSec()); 
+
+		vector<double> single_axis_points;
+
        for(double i=0; i<=(((double)msg.points[points_count-1].time_from_start.toSec())); i=i+0.004)
          {
             x_out = x_out + 0.004;
             spline.getYbyX(x_out, y_out); //x是时间，y是点
+			single_axis_points.push_back(y_out); //get points in single axis
          }
          spline.oFile<<" "<<","<<" "<<","<<" "<<","<<" "<<endl;
+		all_points.push_back(single_axis_points); //pull all point together. rows represent axis
+
+		//print 6 axis point in same time stamp, should change later. should be sent to the sj interface
+		for (int j=0; j<all_points[0].size(); j++)
+		{
+			for(int i=0; i<all_points.size(); i++)
+				cout << all_points[i][j] << " ";
+			cout << endl;
+		}
      }
  
 
